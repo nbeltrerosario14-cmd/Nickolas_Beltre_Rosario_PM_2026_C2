@@ -1,0 +1,31 @@
+void main()
+{
+    int I, N, NUM, SPA = 0, SIM = 0, CIM = 0;
+    printf("Ingrese el numero de datos que se van a procesar:\t");
+    scanf("%d", &N);
+
+    if (N > 0)
+    {
+        for (I = 1; I <= N; I++)
+        {
+            printf("\nIngrese el numero %d: ", I);
+            scanf("%d", &NUM);
+
+            if (NUM % 2 == 0)
+                SPA += NUM;
+            else
+            {
+                SIM += NUM;
+                CIM++;
+            }
+        }
+
+        printf("\nLa suma de los numeros pares es: %d", SPA);
+        if (CIM != 0)
+            printf("\nEl promedio de los numeros impares es: %5.2f\n", (float)SIM / CIM);
+        else
+            printf("\nNo se ingresaron numeros impares\n");
+    }
+    else
+        printf("\nEl valor de N es incorrecto\n");
+}
