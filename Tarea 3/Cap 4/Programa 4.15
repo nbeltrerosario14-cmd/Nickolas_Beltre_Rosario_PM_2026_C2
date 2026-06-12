@@ -1,0 +1,22 @@
+int Productoria(int);
+
+void main(void)
+{
+int NUM;
+do
+{
+    printf("Ingresa el numero del cual quieres calcular la productoriaL");
+    scanf("%d", &NUM);
+}
+while (NUM >100 || NUM < 1);
+printf("\nLa profuctoria de %d es: %d", NUM, Productoria (NUM));
+}
+
+int Productoria (int N)
+/* La funcion calcula la productoria de N.*/
+{
+int I, PRO = 1;
+for (I = 1; I <= N; I++)
+    PRO += I;
+return (PRO);
+}
