@@ -1,0 +1,162 @@
+#include <stdio.h>
+
+/*
+    Este programa trabaja con un archivo binario llamado alu.dat.
+
+    Cada aspirante tiene:
+    - clave
+    - nombre
+    - carrera
+    - promedio de preparatoria
+    - calificacion del examen de admision
+    - telefono
+
+    Carreras:
+    1 = Economia
+    2 = Contabilidad
+    3 = Derecho
+    4 = Ingenieria en Computacion
+    5 = Ingenieria Industrial
+*/
+
+typedef struct {
+    int clave;
+    char nombre[30];
+    int carrera;
+    float promedio_prepa;
+    float examen;
+    char telefono[20];
+} aspirante;
+
+int es_admitido(aspirante);
+const char *nombre_archivo_carrera(int);
+
+int main(void) {
+    FILE *entrada;
+    FILE *salida[6];
+
+    aspirante alu;
+
+    int total_aspirantes = 0;
+    int admitidos[6] = {0};
+    int i;
+
+    float suma_examen = 0;
+    float suma_examen_admitidos[6] = {0};
+
+    /*
+        Abrimos el archivo principal en modo lectura binaria.
+        Este archivo debe existir antes de ejecutar el programa.
+    */
+    entrada = fopen("alu.dat", "rb");
+
+    if (entrada == NULL) {
+        printf("El archivo alu.dat no se puede abrir\n");
+        return 1;
+    }
+
+    /*
+        Creamos un archivo binario para los admitidos de cada carrera.
+    */
+    for (i = 1; i <= 5; i++) {
+        salida[i] = fopen(nombre_archivo_carrera(i), "wb");
+
+        if (salida[i] == NULL) {
+            printf("No se pudo crear un archivo de admitidos\n");
+            fclose(entrada);
+            return 1;
+        }
+    }
+
+    /*
+        Leemos todos los aspirantes del archivo alu.dat.
+    */
+    while (fread(&alu, sizeof(aspirante), 1, entrada) == 1) {
+        total_aspirantes++;
+        suma_examen += alu.examen;
+
+        /*
+            Si cumple las condiciones de admision,
+            se guarda en el archivo de su carrera.
+        */
+        if (alu.carrera >= 1 && alu.carrera <= 5 && es_admitido(alu)) {
+            fwrite(&alu, sizeof(aspirante), 1, salida[alu.carrera]);
+
+            admitidos[alu.carrera]++;
+            suma_examen_admitidos[alu.carrera] += alu.examen;
+        }
+    }
+
+    /*
+        Mostramos el promedio general del examen.
+    */
+    if (total_aspirantes > 0) {
+        printf("\nPromedio general del examen de admision: %.2f\n",
+               suma_examen / total_aspirantes);
+    } else {
+        printf("\nNo hay aspirantes registrados.\n");
+    }
+
+    /*
+        Mostramos resultados por carrera.
+    */
+    for (i = 1; i <= 5; i++) {
+        printf("\nCarrera %d", i);
+        printf("\nAdmitidos: %d", admitidos[i]);
+
+        if (admitidos[i] > 0) {
+            printf("\nPromedio examen admitidos: %.2f\n",
+                   suma_examen_admitidos[i] / admitidos[i]);
+        } else {
+            printf("\nPromedio examen admitidos: 0.00\n");
+        }
+
+        fclose(salida[i]);
+    }
+
+    fclose(entrada);
+
+    printf("\nArchivos de admitidos creados correctamente.\n");
+
+    return 0;
+}
+
+/*
+    Determina si un aspirante queda admitido.
+
+    Condiciones del libro:
+    - examen >= 1300 y promedio de preparatoria >= 8
+      O
+    - examen > 1399 y promedio de preparatoria >= 7
+*/
+int es_admitido(aspirante alu) {
+    if (alu.examen >= 1300 && alu.promedio_prepa >= 8) {
+        return 1;
+    }
+
+    if (alu.examen > 1399 && alu.promedio_prepa >= 7) {
+        return 1;
+    }
+
+    return 0;
+}
+
+/*
+    Devuelve el nombre del archivo segun la carrera.
+*/
+const char *nombre_archivo_carrera(int carrera) {
+    switch (carrera) {
+    case 1:
+        return "admitidos_economia.dat";
+    case 2:
+        return "admitidos_contabilidad.dat";
+    case 3:
+        return "admitidos_derecho.dat";
+    case 4:
+        return "admitidos_computacion.dat";
+    case 5:
+        return "admitidos_industrial.dat";
+    default:
+        return "admitidos_desconocido.dat";
+    }
+}
