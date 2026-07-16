@@ -1,0 +1,42 @@
+#include <stdio.h>
+
+/*
+    Este programa agrega caracteres al final del archivo libro.txt.
+    Modo "a":
+    a = append, significa agregar al final del archivo.
+    Si libro.txt no existe, C lo crea automaticamente.
+*/
+
+int main(void) {
+    FILE *ar;
+    int caracter;
+
+    ar = fopen("libro.txt", "a");
+
+    if (ar == NULL) {
+        printf("No se puede abrir el archivo libro.txt\n");
+        return 1;
+    }
+
+    printf("Escribe el texto que deseas agregar al archivo:\n");
+
+    /*
+        Leemos caracter por caracter desde el teclado.
+        El ciclo termina cuando presionas Enter.
+    */
+    while ((caracter = getchar()) != '\n' && caracter != EOF) {
+        fputc(caracter, ar);
+    }
+
+    /*
+        Agregamos un salto de linea para que el archivo
+        no quede todo pegado.
+    */
+    fputc('\n', ar);
+
+    fclose(ar);
+
+    printf("\nTexto agregado correctamente a libro.txt\n");
+
+    return 0;
+}
