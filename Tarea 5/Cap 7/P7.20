@@ -1,0 +1,57 @@
+#include <stdio.h>
+#include <string.h>
+
+/* Prototipo de funcion. */
+
+int longitud(char *cad);
+
+int main(void)
+{
+    int i, n, l = -1, p, t;
+    char cad[50], FRA[20][50];
+    printf("\nIngrese el numero de filas del arreglo: ");
+    scanf("%d", &n);
+    if (n <= 0 || n > 20)
+    {
+        printf("\nNumero de filas invalido. Debe estar entre 1 y 20.\n");
+        return 1;
+    }
+
+    while (getchar() != '\n');
+    for (i = 0; i < n; i++)
+    {
+        printf("\nIngrese la linea %d de texto. Maximo 50 caracteres: ", i + 1);
+        if (fgets(FRA[i], sizeof(FRA[i]), stdin) == NULL)
+        {
+            printf("\nError al leer la entrada.\n");
+            return 1;
+        }
+        FRA[i][strcspn(FRA[i], "\n")] = '\0';
+    }
+
+    printf("\n");
+    for (i = 0; i < n; i++)
+    {
+        strcpy(cad, FRA[i]);
+        t = longitud(cad);
+        if (t > l)
+        {
+            l = t;
+            p = i;
+        }
+    }
+    printf("\nLa cadena con mayor longitud es: ");
+    puts(FRA[p]);
+    printf("\nLongitud: %d\n", l);
+    return 0;
+}
+
+int longitud(char *cadena)
+{
+    int cue = 0;
+    while (cadena[cue] != '\0')
+    {
+        cue++;
+    }
+    return (cue);
+}
