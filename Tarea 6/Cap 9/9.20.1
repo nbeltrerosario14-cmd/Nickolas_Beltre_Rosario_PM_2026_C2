@@ -1,0 +1,117 @@
+#include <stdio.h>
+#include <string.h>
+
+/*
+    Este programa crea el archivo binario esc.dat.
+
+    Ese archivo sera usado por el Programa 9.20.
+
+    Cada alumno tiene:
+    - matricula
+    - nombre
+    - 5 materias
+    - una calificacion por cada materia
+*/
+
+typedef struct {
+    char materia[30];
+    int calificacion;
+} matcal;
+
+typedef struct {
+    int matricula;
+    char nombre[30];
+    matcal cal[5];
+} alumno;
+
+void limpiar_buffer(void);
+void limpiar_salto(char []);
+int leer_entero(char []);
+
+int main(void) {
+    FILE *ap;
+    alumno alu;
+    int i, j, n;
+
+    /*
+        Abrimos esc.dat en modo escritura binaria.
+        Si ya existe, se sobrescribe.
+    */
+    ap = fopen("esc.dat", "wb");
+
+    if (ap == NULL) {
+        printf("No se pudo crear el archivo esc.dat\n");
+        return 1;
+    }
+
+    n = leer_entero("Cuantos alumnos desea registrar?: ");
+
+    for (i = 0; i < n; i++) {
+        printf("\nAlumno %d\n", i + 1);
+
+        alu.matricula = leer_entero("Matricula: ");
+
+        printf("Nombre: ");
+        fgets(alu.nombre, sizeof(alu.nombre), stdin);
+        limpiar_salto(alu.nombre);
+
+        /*
+            Pedimos las 5 materias y sus calificaciones.
+        */
+        for (j = 0; j < 5; j++) {
+            printf("Nombre de la materia %d: ", j + 1);
+            fgets(alu.cal[j].materia, sizeof(alu.cal[j].materia), stdin);
+            limpiar_salto(alu.cal[j].materia);
+
+            alu.cal[j].calificacion = leer_entero("Calificacion: ");
+        }
+
+        /*
+            Guardamos el alumno completo en el archivo.
+        */
+        fwrite(&alu, sizeof(alumno), 1, ap);
+    }
+
+    fclose(ap);
+
+    printf("\nArchivo esc.dat creado correctamente.\n");
+
+    return 0;
+}
+
+/*
+    Limpia caracteres pendientes del teclado despues de usar scanf.
+*/
+void limpiar_buffer(void) {
+    int c;
+
+    while ((c = getchar()) != '\n' && c != EOF) {
+    }
+}
+
+/*
+    Elimina el salto de linea que deja fgets al final de una cadena.
+*/
+void limpiar_salto(char cadena[]) {
+    cadena[strcspn(cadena, "\n")] = '\0';
+}
+
+/*
+    Lee enteros de forma segura.
+    Si el usuario escribe algo incorrecto, vuelve a preguntar.
+*/
+int leer_entero(char mensaje[]) {
+    int valor;
+
+    while (1) {
+        printf("%s", mensaje);
+
+        if (scanf("%d", &valor) == 1) {
+            limpiar_buffer();
+            return valor;
+        }
+
+        printf("Entrada invalida. Debe escribir un numero entero.\n");
+        limpiar_buffer();
+    }
+}
