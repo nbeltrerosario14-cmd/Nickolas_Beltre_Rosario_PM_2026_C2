@@ -1,0 +1,50 @@
+#include <stdio.h>
+
+typedef struct {
+    int clave;
+    int departamento;
+    float salario;
+    float ventas[12];
+} empleado;
+
+int main(void) {
+    FILE *ar;
+    empleado emple;
+    int i, j, n;
+
+    ar = fopen("ad5_empleados.dat", "wb");
+
+    if (ar == NULL) {
+        printf("No se pudo crear el archivo ad5_empleados.dat\n");
+        return 1;
+    }
+
+    printf("Cuantos empleados desea registrar?: ");
+    scanf("%d", &n);
+
+    for (i = 0; i < n; i++) {
+        printf("\nEmpleado %d\n", i + 1);
+
+        printf("Clave: ");
+        scanf("%d", &emple.clave);
+
+        printf("Departamento: ");
+        scanf("%d", &emple.departamento);
+
+        printf("Salario: ");
+        scanf("%f", &emple.salario);
+
+        for (j = 0; j < 12; j++) {
+            printf("Ventas del mes %d: ", j + 1);
+            scanf("%f", &emple.ventas[j]);
+        }
+
+        fwrite(&emple, sizeof(empleado), 1, ar);
+    }
+
+    fclose(ar);
+
+    printf("\nArchivo ad5_empleados.dat creado correctamente.\n");
+
+    return 0;
+}
