@@ -1,0 +1,124 @@
+#include <stdio.h>
+
+/*
+    Este programa trabaja con un archivo binario llamado esc.dat.
+
+    Cada alumno tiene:
+    - matricula
+    - nombre
+    - 5 materias
+    - una calificacion por cada materia
+*/
+
+typedef struct {
+    char materia[30];
+    int calificacion;
+} matcal;
+
+typedef struct {
+    int matricula;
+    char nombre[30];
+    matcal cal[5];
+} alumno;
+
+void F1(FILE *);
+void F2(FILE *);
+float F3(FILE *);
+
+int main(void) {
+    FILE *ap;
+    float pro;
+
+    /*
+        Abrimos esc.dat en modo lectura binaria.
+        Este archivo debe existir antes de ejecutar el programa.
+    */
+    ap = fopen("esc.dat", "rb");
+
+    if (ap != NULL) {
+        F1(ap);
+        F2(ap);
+
+        pro = F3(ap);
+
+        printf("\n\nPROMEDIO GENERAL MATERIA 4: %.2f\n", pro);
+
+        fclose(ap);
+    } else {
+        printf("\nEl archivo esc.dat no se puede abrir\n");
+        return 1;
+    }
+
+    return 0;
+}
+
+/*
+    F1:
+    Muestra la matricula y el promedio general de cada alumno.
+*/
+void F1(FILE *ap) {
+    alumno alu;
+    int j;
+    float suma;
+    float promedio;
+
+    rewind(ap);
+
+    printf("\nMATRICULA Y PROMEDIOS\n");
+
+    while (fread(&alu, sizeof(alumno), 1, ap) == 1) {
+        suma = 0;
+
+        for (j = 0; j < 5; j++) {
+            suma += alu.cal[j].calificacion;
+        }
+
+        promedio = suma / 5;
+
+        printf("\nMatricula: %d", alu.matricula);
+        printf("\tNombre: %s", alu.nombre);
+        printf("\tPromedio: %.2f", promedio);
+    }
+}
+
+/*
+    F2:
+    Muestra las matriculas de los alumnos cuya calificacion
+    en la tercera materia sea mayor que 9.
+*/
+void F2(FILE *ap) {
+    alumno alu;
+
+    rewind(ap);
+
+    printf("\n\nALUMNOS CON CALIFICACION > 9 EN MATERIA 3\n");
+
+    while (fread(&alu, sizeof(alumno), 1, ap) == 1) {
+        if (alu.cal[2].calificacion > 9) {
+            printf("\nMatricula del alumno: %d", alu.matricula);
+        }
+    }
+}
+
+/*
+    F3:
+    Calcula el promedio general de la cuarta materia.
+*/
+float F3(FILE *ap) {
+    alumno alu;
+    int cantidad = 0;
+    float suma = 0;
+
+    rewind(ap);
+
+    while (fread(&alu, sizeof(alumno), 1, ap) == 1) {
+        suma += alu.cal[3].calificacion;
+        cantidad++;
+    }
+
+    if (cantidad == 0) {
+        return 0;
+    }
+
+    return suma / cantidad;
+}
