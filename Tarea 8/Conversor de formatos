@@ -1,0 +1,151 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <dirent.h>
+
+// Definiciones requeridas por las librerías STB antes de incluirlas
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+
+#define MAX_ARCHIVOS 100
+#define MAX_NOMBRE 256
+
+// Función para listar archivos compatibles (.png, .jpg, .jpeg, .bmp)
+int listar_imagenes(char lista[MAX_ARCHIVOS][MAX_NOMBRE]) {
+    DIR *dir;
+    struct dirent *ent;
+    int contador = 0;
+
+    dir = opendir(".");
+    if (dir == NULL) {
+        printf("No se pudo abrir la carpeta actual.\n");
+        return 0;
+    }
+
+    while ((ent = readdir(dir)) != NULL && contador < MAX_ARCHIVOS) {
+        char *ext = strrchr(ent->d_name, '.');
+        if (ext != NULL) {
+            if (strcasecmp(ext, ".png") == 0 || 
+                strcasecmp(ext, ".jpg") == 0 || 
+                strcasecmp(ext, ".jpeg") == 0 || 
+                strcasecmp(ext, ".bmp") == 0) {
+                
+                strncpy(lista[contador], ent->d_name, MAX_NOMBRE);
+                contador++;
+            }
+        }
+    }
+    closedir(dir);
+    return contador;
+}
+
+// Función que procesa y convierte cualquier formato a Blanco y Negro
+void procesar_imagen(const char *nombre_archivo) {
+    int ancho, alto, canales;
+    
+    // 1. Cargar la imagen de forma automatica (descomprime JPG, PNG o BMP a pixeles crudos)
+    // Forzamos 0 para mantener los canales originales (ej: 3 para RGB, 4 para RGBA)
+    unsigned char *pixeles = stbi_load(nombre_archivo, &ancho, &alto, &canales, 0);
+    
+    if (pixeles == NULL) {
+        printf("Error al cargar la imagen '%s'.\n", nombre_archivo);
+        return;
+    }
+
+    printf("\nProcesando: %s (%dx%d, %d canales de color)...\n", nombre_archivo, ancho, alto, canales);
+
+    // 2. Recorrer la matriz de pixeles en memoria y aplicar escala de grises
+    size_t total_pixeles = (size_t)ancho * alto;
+    for (size_t i = 0; i < total_pixeles; i++) {
+        // Obtenemos el indice base del pixel actual en el array unidimensional
+        size_t idx = i * canales;
+        
+        // Formula estandar de luminancia: R*0.299 + G*0.587 + B*0.114
+        unsigned char gris = (unsigned char)(0.299f * pixeles[idx] + 
+                                             0.587f * pixeles[idx + 1] + 
+                                             0.114f * pixeles[idx + 2]);
+        
+        // Asignamos el valor gris a los componentes Rojo, Verde y Azul
+        pixeles[idx]     = gris; // R
+        pixeles[idx + 1] = gris; // G
+        pixeles[idx + 2] = gris; // B
+        // Si tiene un 4to canal (Alfa/Transparencia en PNG), lo dejamos intacto en pixeles[idx + 3]
+    }
+
+    // 3. Generar el nombre del nuevo archivo guardando la extension original
+    char nombre_salida[MAX_NOMBRE + 5];
+    char sin_ext[MAX_NOMBRE];
+    char *p_ext = strrchr(nombre_archivo, '.');
+    
+    size_t longitud_base = p_ext - nombre_archivo;
+    strncpy(sin_ext, nombre_archivo, longitud_base);
+    sin_ext[longitud_base] = '\0';
+    
+    sprintf(nombre_salida, "%s_bn%s", sin_ext, p_ext);
+
+    // 4. Guardar los pixeles modificados en el formato correcto segun su extension
+    int exito = 0;
+    if (strcasecmp(p_ext, ".png") == 0) {
+        // Ancho * canales representa el "stride" en memoria (salto de linea)
+        exito = stbi_write_png(nombre_salida, ancho, alto, canales, pixeles, ancho * canales);
+    } 
+    else if (strcasecmp(p_ext, ".jpg") == 0 || strcasecmp(p_ext, ".jpeg") == 0) {
+        // 90 es la calidad de compresion del JPG (de 1 a 100)
+        exito = stbi_write_jpg(nombre_salida, ancho, alto, canales, pixeles, 90);
+    } 
+    else if (strcasecmp(p_ext, ".bmp") == 0) {
+        exito = stbi_write_bmp(nombre_salida, ancho, alto, canales, pixeles);
+    }
+
+    // 5. Liberar la memoria dinamica reservada por STB
+    stbi_image_free(pixeles);
+
+    if (exito) {
+        printf("¡Imagen convertida con exito!: %s\n", nombre_salida);
+    } else {
+        printf("Error al guardar la nueva imagen.\n");
+    }
+}
+
+int main() {
+    char archivos[MAX_ARCHIVOS][MAX_NOMBRE];
+    int total_archivos;
+    int opcion;
+
+    while (1) {
+        total_archivos = listar_imagenes(archivos);
+
+        printf("\n--- CONVERTIDOR MULTIFORMATO A BLANCO Y NEGRO ---\n");
+        if (total_archivos == 0) {
+            printf("No se encontraron archivos JPG, PNG o BMP en esta carpeta.\n");
+            printf("Asegurate de colocar fotos en el mismo directorio del ejecutable.\n");
+            break;
+        }
+
+        for (int i = 0; i < total_archivos; i++) {
+            printf("%d. %s\n", i + 1, archivos[i]);
+        }
+        printf("%d. Salir\n", total_archivos + 1);
+
+        printf("\nSeleccione la imagen a convertir: ");
+        if (scanf("%d", &opcion) != 1) {
+            printf("Entrada no valida.\n");
+            fflush(stdin);
+            continue;
+        }
+
+        if (opcion == total_archivos + 1) {
+            printf("Saliendo del programa...\n");
+            break;
+        } else if (opcion >= 1 && opcion <= total_archivos) {
+            procesar_imagen(archivos[opcion - 1]);
+        } else {
+            printf("Opcion fuera de rango. Intente nuevamente.\n");
+        }
+    }
+
+    return 0;
+}
