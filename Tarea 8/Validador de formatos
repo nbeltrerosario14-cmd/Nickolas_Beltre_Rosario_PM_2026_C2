@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Firmas Hexadecimales conocidas (Magic Bytes)
+unsigned char magic_png[] = {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A}; // 8 bytes
+unsigned char magic_jpg[] = {0xFF, 0xD8, 0xFF};                             // 3 bytes
+unsigned char magic_bmp[] = {0x42, 0x4D};                                     // 2 bytes ('BM')
+
+void verificar_archivo(const char *nombre_archivo) {
+    FILE *archivo = fopen(nombre_archivo, "rb");
+    if (archivo == NULL) {
+        printf("Error: El archivo '%s' no existe o no se puede abrir.\n", nombre_archivo);
+        return;
+    }
+
+    // Obtener la extensión del archivo en minúsculas
+    char *ext = strrchr(nombre_archivo, '.');
+    if (ext == NULL) {
+        printf("El archivo no tiene una extension valida.\n");
+        fclose(archivo);
+        return;
+    }
+
+    // Leer los primeros 8 bytes (suficientes para validar los formatos solicitados)
+    unsigned char bytes_iniciales[8];
+    size_t bytes_leidos = fread(bytes_iniciales, 1, 8, archivo);
+    fclose(archivo);
+
+    if (bytes_leidos < 2) {
+        printf("El archivo es demasiado pequeno para ser valido.\n");
+        return;
+    }
+
+    // Validar según la extensión detectada
+    if (strcasecmp(ext, ".png") == 0) {
+        if (memcmp(bytes_iniciales, magic_png, 8) == 0) {
+            printf("VALIDO: El archivo es un PNG real.\n");
+        } else {
+            printf("FALSO/CORRUPTO: La extension es .png pero el contenido interno NO lo es.\n");
+        }
+    } 
+    else if (strcasecmp(ext, ".jpg") == 0 || strcasecmp(ext, ".jpeg") == 0) {
+        if (memcmp(bytes_iniciales, magic_jpg, 3) == 0) {
+            printf("VALIDO: El archivo es un JPG real.\n");
+        } else {
+            printf("FALSO/CORRUPTO: La extension es .jpg pero el contenido interno NO lo es.\n");
+        }
+    } 
+    else if (strcasecmp(ext, ".bmp") == 0) {
+        if (memcmp(bytes_iniciales, magic_bmp, 2) == 0) {
+            printf("VALIDO: El archivo es un BMP real.\n");
+        } else {
+            printf("FALSO/CORRUPTO: La extension es .bmp pero el contenido interno NO lo es.\n");
+        }
+    } 
+    else {
+        printf("Extension '%s' no soportada en este validador. (Use .png, .jpg, .bmp)\n", ext);
+    }
+}
+
+int main() {
+    char nombre_archivo[256];
+
+    printf("--- VALIDADOR DE CONTENIDO REAL (C言語) ---\n");
+    printf("Escriba el nombre del archivo a verificar (ej: foto.jpg): ");
+    
+    // Leer línea incluyendo espacios si los hubiera
+    scanf("%255s", nombre_archivo);
+
+    verificar_archivo(nombre_archivo);
+
+    return 0;
+}
