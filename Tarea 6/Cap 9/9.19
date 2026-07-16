@@ -1,0 +1,94 @@
+#include <stdio.h>
+
+/*
+    Este programa lee un archivo binario de alumnos llamado ad5_alumnos.dat.
+
+    El archivo original debe estar ordenado de mayor a menor por matricula.
+
+    Luego crea otro archivo llamado ad6_alumnos.dat,
+    pero ordenado de menor a mayor.
+*/
+
+typedef struct {
+    int matricula;
+    char nombre[30];
+    char carrera[30];
+    float promedio;
+} alumno;
+
+void ordena(FILE *, FILE *);
+
+int main(void) {
+    FILE *ar1;
+    FILE *ar2;
+
+    /*
+        Abrimos el archivo original para lectura binaria.
+        Abrimos el nuevo archivo para escritura binaria.
+    */
+    ar1 = fopen("ad5_alumnos.dat", "rb");
+    ar2 = fopen("ad6_alumnos.dat", "wb");
+
+    if (ar1 != NULL && ar2 != NULL) {
+        ordena(ar1, ar2);
+
+        fclose(ar1);
+        fclose(ar2);
+
+        printf("Archivo ad6_alumnos.dat creado correctamente.\n");
+    } else {
+        printf("\nEl o los archivos no se pudieron abrir.\n");
+
+        if (ar1 != NULL) {
+            fclose(ar1);
+        }
+
+        if (ar2 != NULL) {
+            fclose(ar2);
+        }
+
+        return 1;
+    }
+
+    return 0;
+}
+
+void ordena(FILE *ap1, FILE *ap2) {
+    alumno alu;
+    long cantidad_registros;
+    long i;
+
+    /*
+        Nos movemos al final del archivo para saber cuantos bytes tiene.
+    */
+    fseek(ap1, 0, SEEK_END);
+
+    /*
+        ftell devuelve la posicion actual en bytes.
+        Si dividimos los bytes totales entre el tamano de un alumno,
+        obtenemos la cantidad de registros.
+    */
+    cantidad_registros = ftell(ap1) / sizeof(alumno);
+
+    /*
+        Como el archivo esta de mayor a menor,
+        lo recorremos desde el ultimo registro hasta el primero.
+        Asi queda de menor a mayor en el archivo nuevo.
+    */
+    for (i = cantidad_registros - 1; i >= 0; i--) {
+        /*
+            Nos posicionamos en el registro i.
+        */
+        fseek(ap1, i * sizeof(alumno), SEEK_SET);
+
+        /*
+            Leemos ese alumno del archivo original.
+        */
+        fread(&alu, sizeof(alumno), 1, ap1);
+
+        /*
+            Escribimos el alumno en el archivo nuevo.
+        */
+        fwrite(&alu, sizeof(alumno), 1, ap2);
+    }
+}
