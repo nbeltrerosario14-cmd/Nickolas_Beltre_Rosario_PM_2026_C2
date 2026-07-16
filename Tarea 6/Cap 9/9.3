@@ -1,0 +1,30 @@
+#include <stdio.h>
+#include <string.h>
+
+/* Archivos y cadenas.
+   El programa escribe cadenas de caracteres en un archivo. */
+int main(void) {
+    char cad[50];
+    FILE *ar;
+
+    /* Abrimos el archivo en modo escritura ("w") */
+    if ((ar = fopen("arc.txt", "w")) != NULL) {
+        printf("Escribe las cadenas que deseas guardar en el archivo.\n");
+        printf("Para terminar, escribe la palabra 'fin':\n\n");
+
+        fgets(cad, 50, stdin); /* Lee una cadena desde el teclado */
+
+        /* Mientras la cadena no sea "fin", se escribe en el archivo */
+        while (strcmp(cad, "fin\n") != 0) {
+            fputs(cad, ar);
+            fgets(cad, 50, stdin);
+        }
+
+        fclose(ar);
+        printf("\n¡Archivo guardado con éxito!\n");
+    } else {
+        printf("Error: No se puede abrir el archivo.\n");
+    }
+
+    return 0;
+}
