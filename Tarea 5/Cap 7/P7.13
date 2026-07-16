@@ -1,0 +1,24 @@
+#include <stdio.h>
+
+/* Calcula longitud.
+El programa calcula la longitud de la cadena sin utilizar la funcion strlen.*/
+
+int cuenta(char *);
+
+void main(void)
+{
+    int i;
+    char cad[50];
+    printf("\nIngrese la cadena de cararteres:");
+    gets(cad);
+    i = cuenta(cad);
+    printf("\nLongitud de la cadena: %d", i);
+}
+
+int cuenta(char *cadena)
+{
+    int c = 0;
+    while (!cadena[c] == '\0')
+         c++;
+    return(c);
+}
