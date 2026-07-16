@@ -1,0 +1,147 @@
+#include <stdio.h>
+#include <string.h>
+
+/*
+    Este programa crea el archivo binario alu.dat.
+
+    Ese archivo sera usado por el Programa 9.21.
+
+    Cada aspirante tiene:
+    - clave
+    - nombre
+    - carrera
+    - promedio de preparatoria
+    - calificacion del examen de admision
+    - telefono
+*/
+
+typedef struct {
+    int clave;
+    char nombre[30];
+    int carrera;
+    float promedio_prepa;
+    float examen;
+    char telefono[20];
+} aspirante;
+
+void limpiar_buffer(void);
+void limpiar_salto(char []);
+int leer_entero(char []);
+float leer_real(char []);
+
+int main(void) {
+    FILE *ar;
+    aspirante alu;
+    int i, n;
+
+    /*
+        Abrimos alu.dat en modo escritura binaria.
+        Si el archivo ya existe, se borra y se crea nuevamente.
+    */
+    ar = fopen("alu.dat", "wb");
+
+    if (ar == NULL) {
+        printf("No se pudo crear el archivo alu.dat\n");
+        return 1;
+    }
+
+    n = leer_entero("Cuantos aspirantes desea registrar?: ");
+
+    for (i = 0; i < n; i++) {
+        printf("\nAspirante %d\n", i + 1);
+
+        alu.clave = leer_entero("Clave del alumno: ");
+
+        printf("Nombre del alumno: ");
+        fgets(alu.nombre, sizeof(alu.nombre), stdin);
+        limpiar_salto(alu.nombre);
+
+        printf("\nCarreras disponibles:\n");
+        printf("1 = Economia\n");
+        printf("2 = Contabilidad\n");
+        printf("3 = Derecho\n");
+        printf("4 = Ingenieria en Computacion\n");
+        printf("5 = Ingenieria Industrial\n");
+
+        do {
+            alu.carrera = leer_entero("Carrera universitaria: ");
+
+            if (alu.carrera < 1 || alu.carrera > 5) {
+                printf("Carrera invalida. Debe ser un numero del 1 al 5.\n");
+            }
+        } while (alu.carrera < 1 || alu.carrera > 5);
+
+        alu.promedio_prepa = leer_real("Promedio de preparatoria: ");
+        alu.examen = leer_real("Calificacion examen de admision: ");
+
+        printf("Telefono: ");
+        fgets(alu.telefono, sizeof(alu.telefono), stdin);
+        limpiar_salto(alu.telefono);
+
+        /*
+            Guardamos el aspirante completo dentro del archivo binario.
+        */
+        fwrite(&alu, sizeof(aspirante), 1, ar);
+    }
+
+    fclose(ar);
+
+    printf("\nArchivo alu.dat creado correctamente.\n");
+
+    return 0;
+}
+
+/*
+    Limpia caracteres pendientes del teclado despues de usar scanf.
+*/
+void limpiar_buffer(void) {
+    int c;
+
+    while ((c = getchar()) != '\n' && c != EOF) {
+    }
+}
+
+/*
+    Quita el salto de linea que deja fgets al final del texto.
+*/
+void limpiar_salto(char cadena[]) {
+    cadena[strcspn(cadena, "\n")] = '\0';
+}
+
+/*
+    Lee un numero entero de forma segura.
+*/
+int leer_entero(char mensaje[]) {
+    int valor;
+
+    while (1) {
+        printf("%s", mensaje);
+
+        if (scanf("%d", &valor) == 1) {
+            limpiar_buffer();
+            return valor;
+        }
+
+        printf("Entrada invalida. Debe escribir un numero entero.\n");
+        limpiar_buffer();
+    }
+}
+
+/*
+    Lee un numero real de forma segura.
+*/
+float leer_real(char mensaje[]) {
+    float valor;
+
+    while (1) {
+        printf("%s", mensaje);
+
+        if (scanf("%f", &valor) == 1) {
+            limpiar_buffer();
+            return valor;
+        }
+
+        printf("Entrada invalida. Debe escribir un numero.\n");
+        limpiar_buffer();
+    }
+}
