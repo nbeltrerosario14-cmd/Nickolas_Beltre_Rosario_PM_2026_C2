@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <ctype.h>
+
+/* Letras minusculas y mayusculas.
+   El programa, al recibir como dato un archivo formado por cadenas de caracteres,
+   determina el numero de letras minusculas y mayusculas que hay en el archivo. */
+
+void minmay(FILE *);
+
+void main(void)
+{
+
+    char p;
+    FILE *ar;
+    if ((ar = fopen("arc5.txt", "r")) != NULL)
+    {
+        minmay(ar);
+        fclose(ar);
+    }
+    else
+        printf("No se pudo abrir el archivo");
+}
+
+void minmay(FILE *arc)
+{
+
+    int min = 0, may = 0;
+    char p;
+    while (!feof(arc))
+    {
+
+        p = fgetc(arc);
+        if (islower(p))
+            min++;
+        else if (isupper(p))
+            may++;
+    }
+    printf("\n\nNumero de minusculas: %d", min);
+    printf("\n\nNumero de mayusculas: %d", may);
+}
