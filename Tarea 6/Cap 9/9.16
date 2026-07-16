@@ -1,0 +1,109 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+/*
+    Este programa lee cadenas desde el archivo arc2.txt.
+    El archivo puede tener texto mezclado con numeros, por ejemplo:
+    Hola 123 mundo 456
+    Adios -789  
+
+    El programa busca los numeros dentro del texto,
+    los suma y luego calcula el promedio.
+*/
+
+void sumypro(FILE *);
+
+int main(void) {
+    FILE *ar;
+
+    /*
+        Abrimos el archivo arc2.txt en modo lectura.
+        Este archivo debe existir antes de ejecutar el programa.
+    */
+    ar = fopen("arc2.txt", "r");
+
+    if (ar != NULL) {
+        sumypro(ar);
+        fclose(ar);
+    } else {
+        printf("No se pudo abrir el archivo arc2.txt\n");
+        return 1;
+    }
+
+    return 0;
+}
+
+void sumypro(FILE *ap) {
+    char cadena[120];
+    char *inicio;
+    char *fin;
+    double numero;
+    double suma = 0;
+    int contador = 0;
+
+    /*
+        fgets lee una linea completa del archivo.
+        El ciclo termina cuando ya no hay mas lineas.
+    */
+    while (fgets(cadena, sizeof(cadena), ap) != NULL) {
+        inicio = cadena;
+
+        /*
+            Recorremos la linea buscando donde empieza un numero.
+        */
+        while (*inicio != '\0') {
+
+            /*
+                Avanzamos mientras el caracter actual no sea:
+                - un digito
+                - un signo +
+                - un signo -
+            */
+            while (*inicio != '\0' &&
+                   !isdigit((unsigned char)*inicio) &&
+                   *inicio != '+' &&
+                   *inicio != '-') {
+                inicio++;
+            }
+
+            /*
+                Si llegamos al final de la cadena, dejamos de revisar esta linea.
+            */
+            if (*inicio == '\0') {
+                break;
+            }
+
+            /*
+                strtod intenta convertir desde inicio hasta donde termine el numero.
+                fin queda apuntando al primer caracter que ya no pertenece al numero.
+            */
+            numero = strtod(inicio, &fin);
+
+            if (fin != inicio) {
+                suma += numero;
+                contador++;
+
+                /*
+                    Movemos inicio hasta donde termino el numero,
+                    para seguir buscando mas numeros en la misma linea.
+                */
+                inicio = fin;
+            } else {
+                /*
+                    Si no pudo convertir, avanzamos un caracter para evitar
+                    quedarnos atrapados en el mismo lugar.
+                */
+                inicio++;
+            }
+        }
+    }
+
+    printf("\nSuma de los numeros: %.2f", suma);
+
+    if (contador > 0) {
+        printf("\nPromedio de los numeros: %.2f\n", suma / contador);
+    } else {
+        printf("\nNo se encontraron numeros en el archivo.\n");
+    }
+}
