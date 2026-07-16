@@ -1,0 +1,42 @@
+#include <stdio.h>
+#include <string.h>
+/* Cadena invertida.
+El programa obtiene la cadena invertida. */
+
+char *inverso(char *);
+
+int main(void)
+{
+    char fra[50], aux[50];
+    printf("\nIngrese la linea de texto: ");
+    fgets(fra, sizeof(fra), stdin);
+    fra[strcspn(fra, "\n")] = '\0';
+
+    if (strlen(fra) == 0)
+    {
+        printf("\nLa cadena esta vacia.\n");
+        return 1;
+    }
+    strcpy(aux, inverso(fra));
+    printf("\nEscribe la linea de texto en forma inversa: ");
+    puts(aux);
+    printf("\n");
+    return 0;
+}
+
+char *inverso(char *cadena)
+{
+    int i = 0, j, lon;
+    lon = strlen(cadena);
+    j = lon - 1;
+
+    while (i < (lon / 2))
+    {
+        char temp = cadena[i];
+        cadena[i] = cadena[j];
+        cadena[j] = temp;
+        i++;
+        j--;
+    }
+    return cadena;
+}
