@@ -1,0 +1,103 @@
+#include <stdio.h>
+
+typedef struct {
+    int clave;
+    int departamento;
+    float salario;
+    float ventas[12];
+} empleado;
+
+void incrementa(FILE *);
+
+int main(void) {
+    FILE *ar;
+
+    /*
+        Abrimos el archivo en modo "r+b":
+        r = read, leer
+        + = tambien escribir
+        b = binary, archivo binario
+
+        Este archivo debe existir antes de ejecutar este programa.
+        Se crea con crear_ad5_empleados.c.
+    */
+    ar = fopen("ad5_empleados.dat", "r+b");
+
+    if (ar != NULL) {
+        incrementa(ar);
+        fclose(ar);
+    } else {
+        printf("\nEl archivo ad5_empleados.dat no se puede abrir.\n");
+        printf("Primero ejecuta crear_ad5_empleados.exe para crearlo.\n");
+        return 1;
+    }
+
+    return 0;
+}
+
+void incrementa(FILE *ap) {
+    empleado emple;
+    int j;
+    int actualizados = 0;
+    int revisados = 0;
+    float sum;
+    long posicion;
+
+    /*
+        ftell(ap) guarda la posicion actual del archivo.
+        Esa posicion se usa luego para regresar y sobrescribir
+        el mismo empleado si necesita aumento.
+    */
+    while ((posicion = ftell(ap)) >= 0 &&
+           fread(&emple, sizeof(empleado), 1, ap) == 1) {
+
+        revisados++;
+        sum = 0;
+
+        /*
+            Sumamos las ventas de los 12 meses.
+        */
+        for (j = 0; j < 12; j++) {
+            sum += emple.ventas[j];
+        }
+
+        printf("\nEmpleado revisado: %d", emple.clave);
+        printf("\nVentas anuales: %.2f", sum);
+        printf("\nSalario actual: %.2f", emple.salario);
+
+        /*
+            Si las ventas anuales son mayores a 1,000,000,
+            aumentamos el salario en 10%.
+        */
+        if (sum > 1000000) {
+            emple.salario = emple.salario * 1.10f;
+
+            /*
+                Regresamos al inicio del registro actual.
+            */
+            fseek(ap, posicion, SEEK_SET);
+
+            /*
+                Sobrescribimos el empleado ya actualizado.
+            */
+            fwrite(&emple, sizeof(empleado), 1, ap);
+
+            /*
+                Volvemos a colocarnos despues del registro actual
+                para seguir leyendo el siguiente empleado.
+            */
+            fseek(ap, posicion + sizeof(empleado), SEEK_SET);
+
+            actualizados++;
+
+            printf("\nResultado: salario aumentado 10%%");
+            printf("\nNuevo salario: %.2f\n", emple.salario);
+        } else {
+            printf("\nResultado: no aplica aumento\n");
+        }
+    }
+
+    printf("\nResumen:");
+    printf("\nEmpleados revisados: %d", revisados);
+    printf("\nEmpleados actualizados: %d\n", actualizados);
+}
