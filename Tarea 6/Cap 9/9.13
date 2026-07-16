@@ -1,0 +1,44 @@
+#include <stdio.h>
+
+/*
+    Este programa cuenta cuantas veces aparece un caracter
+    dentro del archivo de texto arch.txt.
+*/
+
+int main(void) {
+    FILE *ar;
+    int caracter_archivo;
+    int caracter_buscado;
+    int contador = 0;
+
+    /*
+        Abrimos arch.txt en modo lectura.
+        El archivo debe existir antes de ejecutar el programa.
+    */
+    ar = fopen("arch.txt", "r");
+
+    if (ar == NULL) {
+        printf("No se puede abrir el archivo arch.txt\n");
+        return 1;
+    }
+
+    printf("Ingrese el caracter que desea buscar: ");
+    caracter_buscado = getchar();
+
+    /*
+        Leemos el archivo caracter por caracter.
+        fgetc devuelve EOF cuando llega al final del archivo.
+    */
+    while ((caracter_archivo = fgetc(ar)) != EOF) {
+        if (caracter_archivo == caracter_buscado) {
+            contador++;
+        }
+    }
+
+    fclose(ar);
+
+    printf("\nEl caracter '%c' aparece %d veces en el archivo.\n",
+           caracter_buscado, contador);
+
+    return 0;
+}
