@@ -1,0 +1,49 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+/* Curnta palabras.
+El programa calcula el numero de palabras que hay en la cadena de caracteres. */
+
+int cuentap(char *);
+
+int main(void)
+{
+    int i;
+    char fra[50];
+    printf("\nIngrese la linea de texto: ");
+    if (fgets(fra, sizeof(fra), stdin) == NULL)
+    {
+        printf("\nError al leer la entrada.\n");
+        return 1;
+    }
+    fra[strcspn(fra, "\n")] = '\0';
+
+    strncat(fra, " ", sizeof(fra) - strlen(fra) - 1);
+
+    i = cuentap(fra);
+    printf("\nLa linea de texto tiene %d palabras\n", i);
+    return 0;
+}
+
+int cuentap(char *cad)
+{
+    int i = 0;
+    char *cad0 = cad;
+
+    while (*cad0 != '\0')
+    {
+        while (*cad0 == ' ')
+        {
+            cad0++;
+        }
+        if (*cad0 != '\0')
+        {
+            i++;
+            while (*cad0 != ' ' && *cad0 != '\0')
+            {
+                cad0++;
+            }
+        }
+    }
+    return i;
+}
