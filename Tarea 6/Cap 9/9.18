@@ -1,0 +1,139 @@
+#include <stdio.h>
+
+/*
+    Este programa mezcla dos archivos de texto ordenados por matricula.
+
+    Archivos de entrada:
+    - arc9.dat
+    - arc10.dat
+
+    Archivo de salida:
+    - arc11.dat
+
+    Cada linea tiene:
+    matricula calificacion1 calificacion2 calificacion3
+*/
+
+typedef struct {
+    int matricula;
+    float cal[3];
+} registro;
+
+int leer_registro(FILE *, registro *);
+void escribir_registro(FILE *, registro);
+void mezcla(FILE *, FILE *, FILE *);
+
+int main(void) {
+    FILE *ar;
+    FILE *ar1;
+    FILE *ar2;
+
+    /*
+        Abrimos los dos primeros archivos para lectura.
+        Abrimos el tercer archivo para escritura.
+    */
+    ar = fopen("arc9.dat", "r");
+    ar1 = fopen("arc10.dat", "r");
+    ar2 = fopen("arc11.dat", "w");
+
+    if (ar != NULL && ar1 != NULL && ar2 != NULL) {
+        mezcla(ar, ar1, ar2);
+
+        fclose(ar);
+        fclose(ar1);
+        fclose(ar2);
+
+        printf("Archivo arc11.dat creado correctamente.\n");
+    } else {
+        printf("No se pueden abrir los archivos.\n");
+
+        if (ar != NULL) {
+            fclose(ar);
+        }
+
+        if (ar1 != NULL) {
+            fclose(ar1);
+        }
+
+        if (ar2 != NULL) {
+            fclose(ar2);
+        }
+
+        return 1;
+    }
+
+    return 0;
+}
+
+/*
+    Esta funcion intenta leer un registro del archivo.
+
+    Devuelve:
+    1 si pudo leer correctamente
+    0 si ya no hay mas datos
+*/
+int leer_registro(FILE *archivo, registro *reg) {
+    return fscanf(archivo, "%d %f %f %f",
+                  &reg->matricula,
+                  &reg->cal[0],
+                  &reg->cal[1],
+                  &reg->cal[2]) == 4;
+}
+
+/*
+    Escribe un registro en el archivo de salida.
+*/
+void escribir_registro(FILE *archivo, registro reg) {
+    fprintf(archivo, "%d %.1f %.1f %.1f\n",
+            reg.matricula,
+            reg.cal[0],
+            reg.cal[1],
+            reg.cal[2]);
+}
+
+/*
+    Esta funcion mezcla los dos archivos respetando el orden
+    ascendente de las matriculas.
+*/
+void mezcla(FILE *ar, FILE *ar1, FILE *ar2) {
+    registro reg_a;
+    registro reg_b;
+
+    int hay_a;
+    int hay_b;
+
+    /*
+        Leemos el primer registro de cada archivo.
+    */
+    hay_a = leer_registro(ar, &reg_a);
+    hay_b = leer_registro(ar1, &reg_b);
+
+    /*
+        Mientras ambos archivos tengan datos, comparamos matriculas.
+    */
+    while (hay_a && hay_b) {
+        if (reg_a.matricula <= reg_b.matricula) {
+            escribir_registro(ar2, reg_a);
+            hay_a = leer_registro(ar, &reg_a);
+        } else {
+            escribir_registro(ar2, reg_b);
+            hay_b = leer_registro(ar1, &reg_b);
+        }
+    }
+
+    /*
+        Si quedaron registros en arc9.dat, los copiamos.
+    */
+    while (hay_a) {
+        escribir_registro(ar2, reg_a);
+        hay_a = leer_registro(ar, &reg_a);
+    }
+
+    /*
+        Si quedaron registros en arc10.dat, los copiamos.
+    */
+    while (hay_b) {
+        escribir_registro(ar2, reg_b);
+        hay_b = leer_registro(ar1, &reg_b);
+    }
+}
