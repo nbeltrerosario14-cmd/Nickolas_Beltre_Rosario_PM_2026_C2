@@ -1,0 +1,25 @@
+#include <stdio.h>
+
+/* Archivos y cadenas.
+   El programa lee cadenas de caracteres de un archivo. */
+int main(void) {
+    char cad[50];
+    FILE *ar;
+
+    /* Abrimos el archivo en modo lectura ("r") */
+    if ((ar = fopen("arc.txt", "r")) != NULL) {
+        printf("--- Leyendo palabras desde el archivo ---\n\n");
+
+        /* fscanf lee palabra por palabra (deteniéndose en espacios o saltos de línea) */
+        while (fscanf(ar, "%s", cad) != EOF) {
+            printf("%s\n", cad);
+        }
+
+        fclose(ar);
+        printf("\n--- Lectura finalizada ---\n");
+    } else {
+        printf("Error: No se pudo abrir el archivo.\n");
+    }
+
+    return 0;
+}
