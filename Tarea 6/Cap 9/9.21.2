@@ -1,0 +1,86 @@
+#include <stdio.h>
+
+/*
+    Este programa permite leer los archivos binarios de admitidos
+    creados por el Programa 9.21.
+
+    Puedes elegir una carrera y el programa abre el archivo correspondiente.
+*/
+
+typedef struct {
+    int clave;
+    char nombre[30];
+    int carrera;
+    float promedio_prepa;
+    float examen;
+    char telefono[20];
+} aspirante;
+
+const char *nombre_archivo_carrera(int);
+
+int main(void) {
+    FILE *ar;
+    aspirante alu;
+    int carrera;
+    int contador = 0;
+
+    printf("Carreras disponibles:\n");
+    printf("1 = Economia\n");
+    printf("2 = Contabilidad\n");
+    printf("3 = Derecho\n");
+    printf("4 = Ingenieria en Computacion\n");
+    printf("5 = Ingenieria Industrial\n");
+
+    printf("\nIngrese la carrera que desea consultar: ");
+    scanf("%d", &carrera);
+
+    if (carrera < 1 || carrera > 5) {
+        printf("Carrera invalida.\n");
+        return 1;
+    }
+
+    ar = fopen(nombre_archivo_carrera(carrera), "rb");
+
+    if (ar == NULL) {
+        printf("No se pudo abrir el archivo de admitidos.\n");
+        return 1;
+    }
+
+    printf("\nLISTA DE ADMITIDOS\n");
+
+    while (fread(&alu, sizeof(aspirante), 1, ar) == 1) {
+        contador++;
+
+        printf("\nClave: %d", alu.clave);
+        printf("\nNombre: %s", alu.nombre);
+        printf("\nCarrera: %d", alu.carrera);
+        printf("\nPromedio preparatoria: %.2f", alu.promedio_prepa);
+        printf("\nExamen admision: %.2f", alu.examen);
+        printf("\nTelefono: %s\n", alu.telefono);
+    }
+
+    fclose(ar);
+
+    if (contador == 0) {
+        printf("\nNo hay admitidos en esta carrera.\n");
+    }
+
+    return 0;
+}
+
+const char *nombre_archivo_carrera(int carrera) {
+    switch (carrera) {
+    case 1:
+        return "admitidos_economia.dat";
+    case 2:
+        return "admitidos_contabilidad.dat";
+    case 3:
+        return "admitidos_derecho.dat";
+    case 4:
+        return "admitidos_computacion.dat";
+    case 5:
+        return "admitidos_industrial.dat";
+    default:
+        return "admitidos_desconocido.dat";
+    }
+}
