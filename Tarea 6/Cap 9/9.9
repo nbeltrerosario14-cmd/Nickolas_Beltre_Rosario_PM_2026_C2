@@ -1,0 +1,37 @@
+#include <stdio.h>
+
+typedef struct {
+    int matricula;
+    char nombre[30];
+    char carrera[30];
+    float promedio;
+} alumno;
+
+void lee(FILE *);
+
+int main(void) {
+    FILE *ar;
+
+    ar = fopen("ad1.dat", "rb");
+
+    if (ar != NULL) {
+        lee(ar);
+        fclose(ar);
+    } else {
+        printf("\nEl archivo ad1.dat no se puede abrir\n");
+        return 1;
+    }
+
+    return 0;
+}
+
+void lee(FILE *ap) {
+    alumno alu;
+
+    while (fread(&alu, sizeof(alumno), 1, ap) == 1) {
+        printf("\nMatricula: %d", alu.matricula);
+        printf("\nNombre: %s", alu.nombre);
+        printf("\nCarrera: %s", alu.carrera);
+        printf("\nPromedio: %.2f\n", alu.promedio);
+    }
+}
