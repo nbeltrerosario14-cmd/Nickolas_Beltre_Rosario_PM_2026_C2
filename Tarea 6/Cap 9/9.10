@@ -1,0 +1,60 @@
+#include <stdio.h>
+
+typedef struct {
+    int matricula;
+    char nombre[30];
+    char carrera[30];
+    float promedio;
+} alumno;
+
+void modifica(FILE *);
+
+int main(void) {
+    FILE *ar;
+
+    ar = fopen("ad1.dat", "r+b");
+
+    if (ar != NULL) {
+        modifica(ar);
+        fclose(ar);
+    } else {
+        printf("\nEl archivo ad1.dat no se puede abrir\n");
+        return 1;
+    }
+
+    return 0;
+}
+
+void modifica(FILE *ap) {
+    int d;
+    alumno alu;
+
+    printf("\nIngrese el numero de registro que desea modificar: ");
+    scanf("%d", &d);
+
+    if (d <= 0) {
+        printf("Numero de registro invalido.\n");
+        return;
+    }
+
+    fseek(ap, (d - 1) * sizeof(alumno), SEEK_SET);
+
+    if (fread(&alu, sizeof(alumno), 1, ap) != 1) {
+        printf("No existe ese registro.\n");
+        return;
+    }
+
+    printf("\nDatos actuales del alumno:");
+    printf("\nMatricula: %d", alu.matricula);
+    printf("\nNombre: %s", alu.nombre);
+    printf("\nCarrera: %s", alu.carrera);
+    printf("\nPromedio actual: %.2f", alu.promedio);
+
+    printf("\n\nIngrese el promedio correcto del alumno: ");
+    scanf("%f", &alu.promedio);
+
+    fseek(ap, (d - 1) * sizeof(alumno), SEEK_SET);
+    fwrite(&alu, sizeof(alumno), 1, ap);
+
+    printf("\nRegistro actualizado correctamente.\n");
+}
