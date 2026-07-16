@@ -1,0 +1,90 @@
+#include <stdio.h>
+#include <string.h>
+
+/*
+    Este programa lee lineas desde arc.txt.
+
+    Cada vez que encuentra la palabra "mexico",
+    cambia la primera letra por mayuscula:
+
+        mexico  ->  Mexico
+
+    El resultado se guarda en otro archivo llamado arc1.txt.
+*/
+
+void cambia(FILE *, FILE *);
+
+int main(void) {
+    FILE *entrada;
+    FILE *salida;
+
+    /*
+        arc.txt se abre para lectura.
+        arc1.txt se abre para escritura.
+    */
+    entrada = fopen("arc.txt", "r");
+    salida = fopen("arc1.txt", "w");
+
+    if (entrada != NULL && salida != NULL) {
+        cambia(entrada, salida);
+
+        fclose(entrada);
+        fclose(salida);
+
+        printf("Archivo corregido creado en arc1.txt\n");
+    } else {
+        printf("No se pueden abrir los archivos\n");
+
+        if (entrada != NULL) {
+            fclose(entrada);
+        }
+
+        if (salida != NULL) {
+            fclose(salida);
+        }
+
+        return 1;
+    }
+
+    return 0;
+}
+
+void cambia(FILE *ap1, FILE *ap2) {
+    char cadena[200];
+    char *posicion;
+
+    /*
+        Leemos una linea completa del archivo arc.txt.
+    */
+    while (fgets(cadena, sizeof(cadena), ap1) != NULL) {
+
+        /*
+            strstr busca la palabra "mexico" dentro de la cadena.
+            Si la encuentra, devuelve la posicion donde empieza.
+            Si no la encuentra, devuelve NULL.
+        */
+        posicion = strstr(cadena, "mexico");
+
+        /*
+            Puede haber varias veces "mexico" en la misma linea,
+            por eso usamos un while.
+        */
+        while (posicion != NULL) {
+            /*
+                Cambiamos solo la primera letra.
+                Como la palabra era "mexico", queda "Mexico".
+            */
+            posicion[0] = 'M';
+
+            /*
+                Seguimos buscando despues de la palabra encontrada.
+            */
+            posicion = strstr(posicion + 1, "mexico");
+        }
+
+        /*
+            Escribimos la linea corregida en arc1.txt.
+        */
+        fputs(cadena, ap2);
+    }
+}
