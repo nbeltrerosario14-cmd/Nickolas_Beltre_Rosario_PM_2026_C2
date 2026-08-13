@@ -1,0 +1,16 @@
+Registro de movimientos - Torres de Hanoi (4 discos)
+Movimiento 1: Mover disco 1 de A a B
+Movimiento 2: Mover disco 2 de A a C
+Movimiento 3: Mover disco 1 de B a C
+Movimiento 4: Mover disco 3 de A a B
+Movimiento 5: Mover disco 1 de C a A
+Movimiento 6: Mover disco 2 de C a B
+Movimiento 7: Mover disco 1 de A a B
+Movimiento 8: Mover disco 4 de A a C
+Movimiento 9: Mover disco 1 de B a C
+Movimiento 10: Mover disco 2 de B a A
+Movimiento 11: Mover disco 1 de C a A
+Movimiento 12: Mover disco 3 de B a C
+Movimiento 13: Mover disco 1 de A a B
+Movimiento 14: Mover disco 2 de A a C
+Movimiento 15: Mover disco 1 de B a C
