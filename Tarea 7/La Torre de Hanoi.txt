@@ -1,0 +1,7 @@
+La Torre de Hanoi es un problema clásico de programación y matemáticas que consiste en mover una cantidad de discos de una torre a otra, utilizando una torre auxiliar. Los discos comienzan colocados en una torre de mayor a menor tamaño, y el objetivo es trasladarlos todos a otra torre siguiendo ciertas reglas.
+
+El problema tiene tres reglas principales: solo se puede mover un disco a la vez, únicamente se puede mover el disco que está arriba de una torre y nunca se puede colocar un disco grande sobre uno más pequeño. Estas reglas hacen que el problema requiera planificar cuidadosamente cada movimiento.
+
+En programación, la Torre de Hanoi se utiliza principalmente para aprender y comprender la recursividad. La solución consiste en dividir el problema en problemas más pequeños: primero se mueven los discos superiores a la torre auxiliar, luego se mueve el disco más grande a la torre de destino y finalmente se trasladan los discos restantes desde la torre auxiliar hasta la torre de destino.
+
+Por ejemplo, si tenemos 3 discos, se necesitan 7 movimientos para completar el problema. La cantidad mínima de movimientos se calcula mediante la fórmula 2ⁿ − 1, donde n representa la cantidad de discos. Por esta razón, la Torre de Hanoi es un ejemplo muy utilizado para enseñar cómo una función puede llamarse a sí misma hasta alcanzar una condición determinada.
