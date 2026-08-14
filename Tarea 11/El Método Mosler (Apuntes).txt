@@ -1,0 +1,49 @@
+El Método Mosler es un procedimiento analítico y secuencial utilizado para la identificación, análisis y evaluación de riesgos en las empresas. Su principal objetivo es calcular el impacto y la probabilidad de un riesgo concreto para transformar valoraciones cualitativas (opiniones o criterios) en un valor cuantitativo numérico.
+
+A través de este cálculo, la organización puede priorizar qué riesgos requieren una atención inmediata o la implementación de controles de seguridad.
+
+Las 4 Fases del Método Mosler
+
+En el video se habla de un método que consta de cuatro fases consecutivas que van desde la definición del peligro hasta la asignación de su nivel de gravedad.
+
+1) Definición del Riesgo.
+
+En esta primera etapa se identifica de manera clara cuál es el bien o activo a proteger (por ejemplo, información, infraestructura, personal) y qué daño o amenaza específica podría afectarlo (robo, incendio, ciberataque, fallas operativas).
+
+2) Análisis del Riesgo (Los 6 Criterios).
+
+Para medir el riesgo, el método establece 6 criterios de evaluación. Cada criterio se puntúa de manera individual en una escala que va del 1 al 5 (donde 1 representa la menor gravedad y 5 la máxima):
+
+Criterio de Función (F): Mide la consecuencia o alteración que provocaría el riesgo en las actividades normales de la empresa.
+Criterio de Sustitución (S): Evalúa la dificultad o facilidad para reemplazar el bien o activo afectado.
+Criterio de Profundidad (P): Mide el grado de perturbación, daño psicológico o impacto en la imagen de la empresa.
+Criterio de Extensión (E): Evalúa el alcance territorial o geográfico del impacto que tendría el riesgo.
+Criterio de Agresión (A): Mide la probabilidad de que la amenaza se concrete intencionalmente o de forma fortuita.
+Criterio de Vulnerabilidad (V): Evalúa la debilidad institucional frente al riesgo, es decir, qué tan fácil es que la amenaza cause un daño real.
+
+3) Evaluación del Riesgo (Cálculos Matemáticos).
+
+Una vez asignadas las puntuaciones de 1 a 5 a cada criterio, se aplican fórmulas matemáticas para combinar los valores:
+
+Importancia del Riesgo (I): Determina qué tan relevante es el impacto inicial. (I = F x S)
+
+Daños Provocados (D): Mide la severidad directa acumulada. (D = P x E)
+
+Carácter del Riesgo (C): Suma la importancia y los daños calculados. (C = I + D) = [C = (F x S) + (P x E)]
+
+Probabilidad (PB): Refleja la probabilidad real de materialización combinando la agresión y la vulnerabilidad. (PB = A x V)
+Evaluación del Riesgo (ER): Multiplica el carácter por la probabilidad para obtener la puntuación final cuantitativa. (ER = C x PB)
+
+4) Clasificación y Nivel de Gravedad.
+
+El resultado final de la Evaluación del Riesgo (ER) siempre estará situado en un rango entre 2 y 1250. Según el valor obtenido, el riesgo se clasifica dentro de las siguientes categorías para tomar decisiones:
+
+2 a 250: Riesgo Muy Bajo (No requiere acciones inmediatas, basta con monitoreo).
+
+251 a 500: Riesgo Bajo (Se sugieren controles preventivos menores).
+
+501 a 750: Riesgo Medio / Normal (Requiere medidas de mitigación a corto o mediano plazo).
+
+751 a 1000: Riesgo Alto (Se deben implementar planes de acción urgentes).
+
+1001 a 1250: Riesgo Muy Alto / Crítico (Requiere intervención inmediata y asignación de recursos prioritarios).
