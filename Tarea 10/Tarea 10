@@ -18,18 +18,18 @@ typedef struct {
     char modelo[30];
     int ano;
     double costo_vehiculo;        // RD$
-    int vida_util_anos;           // A駉s
-    double km_anuales_est;        // KM estimados por a駉
+    int vida_util_anos;           // A帽os
+    double km_anuales_est;        // KM estimados por a帽o
     double seguro_anual;          // RD$
     double mantenimiento_anual;   // RD$
     double costo_neumaticos;      // RD$ por juego de 4
-    double km_neumaticos;         // Duraci髇 neum醫icos en KM
-    float km_galon_ciudad;        // KM / Gal髇 en Ciudad
-    float km_galon_autopista;     // KM / Gal髇 en Autopista
+    double km_neumaticos;         // Duraci贸n neum谩ticos en KM
+    float km_galon_ciudad;        // KM / Gal贸n en Ciudad
+    float km_galon_autopista;     // KM / Gal贸n en Autopista
     int tipo_combustible;         // 1: Reg, 2: Prem, 3: Diesel, 4: GLP
 } Vehiculo;
 
-// Precios por defecto en Rep鷅lica Dominicana (RD$/Gal髇)
+// Precios por defecto en Rep煤blica Dominicana (RD$/Gal贸n)
 PreciosCombustible preciosRD = {274.50, 290.10, 221.60, 132.60};
 
 // Prototipos de funciones
@@ -135,7 +135,7 @@ void menuPrecios() {
     printf("3. Diesel / Gasoil  : RD$ %.2f\n", preciosRD.diesel);
     printf("4. GLP             : RD$ %.2f\n", preciosRD.glp);
 
-    printf("\n緿esea actualizar los precios? (1: Si, 0: No): ");
+    printf("\n驴Desea actualizar los precios? (1: Si, 0: No): ");
     int resp;
     scanf("%d", &resp);
     if (resp == 1) {
@@ -334,7 +334,7 @@ void calcularViajeYCostoKM(Vehiculo vehiculos[], int cantidad) {
     printf(" COSTO TOTAL REAL AUTOPISTA: RD$ %7.2f / km\n", costo_real_autopista_km);
     printf("=================================================================\n");
 
-    // C醠culo de Viaje
+    // C谩lculo de Viaje
     double km_ciudad, km_autopista;
     printf("\n--- CALCULO DE COSTO DE UN VIAJE ESPECIFICO ---\n");
     printf("Ingrese kilometros a recorrer en CIUDAD: ");
