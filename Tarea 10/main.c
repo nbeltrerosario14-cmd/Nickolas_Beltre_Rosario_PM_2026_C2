@@ -1,0 +1,361 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define ARCHIVO_VEHICULOS "vehiculos.csv"
+#define ARCHIVO_PRECIOS "precios_combustible.txt"
+
+typedef struct {
+    float gasolina_regular;
+    float gasolina_premium;
+    float diesel;
+    float glp;
+} PreciosCombustible;
+
+typedef struct {
+    int id;
+    char marca[30];
+    char modelo[30];
+    int ano;
+    double costo_vehiculo;        // RD$
+    int vida_util_anos;           // Años
+    double km_anuales_est;        // KM estimados por año
+    double seguro_anual;          // RD$
+    double mantenimiento_anual;   // RD$
+    double costo_neumaticos;      // RD$ por juego de 4
+    double km_neumaticos;         // Duración neumáticos en KM
+    float km_galon_ciudad;        // KM / Galón en Ciudad
+    float km_galon_autopista;     // KM / Galón en Autopista
+    int tipo_combustible;         // 1: Reg, 2: Prem, 3: Diesel, 4: GLP
+} Vehiculo;
+
+// Precios por defecto en República Dominicana (RD$/Galón)
+PreciosCombustible preciosRD = {274.50, 290.10, 221.60, 132.60};
+
+// Prototipos de funciones
+void cargarPrecios();
+void guardarPrecios();
+void menuPrecios();
+int cargarVehiculos(Vehiculo vehiculos[]);
+void guardarVehiculos(Vehiculo vehiculos[], int cantidad);
+void crearVehiculo(Vehiculo vehiculos[], int *cantidad);
+void listarVehiculos(Vehiculo vehiculos[], int cantidad);
+void modificarVehiculo(Vehiculo vehiculos[], int cantidad);
+void borrarVehiculo(Vehiculo vehiculos[], int *cantidad);
+void calcularViajeYCostoKM(Vehiculo vehiculos[], int cantidad);
+float obtenerPrecioCombustible(int tipo);
+const char* nombreCombustible(int tipo);
+void limpiarBuffer();
+
+int main() {
+    Vehiculo vehiculos[100];
+    int cantidad = cargarVehiculos(vehiculos);
+    int opcion;
+
+    cargarPrecios();
+
+    do {
+        printf("\n=======================================================\n");
+        printf("   SISTEMA DE COSTO Y AMORTIZACION DE VEHICULOS (RD$)  \n");
+        printf("=======================================================\n");
+        printf("1. Crear Vehiculo\n");
+        printf("2. Listar Vehiculos\n");
+        printf("3. Modificar Parametros de Vehiculo\n");
+        printf("4. Borrar Vehiculo\n");
+        printf("5. Calcular Costo por KM y Calcular Viaje\n");
+        printf("6. Modificar Precios de Combustible (RD$/Galon)\n");
+        printf("0. Salir\n");
+        printf("=======================================================\n");
+        printf("Seleccione una opcion: ");
+        if (scanf("%d", &opcion) != 1) {
+            limpiarBuffer();
+            continue;
+        }
+
+        switch (opcion) {
+            case 1: crearVehiculo(vehiculos, &cantidad); break;
+            case 2: listarVehiculos(vehiculos, cantidad); break;
+            case 3: modificarVehiculo(vehiculos, cantidad); break;
+            case 4: borrarVehiculo(vehiculos, &cantidad); break;
+            case 5: calcularViajeYCostoKM(vehiculos, cantidad); break;
+            case 6: menuPrecios(); break;
+            case 0: printf("\nSaliendo del programa...\n"); break;
+            default: printf("\nOpcion invalida.\n");
+        }
+    } while (opcion != 0);
+
+    return 0;
+}
+
+void limpiarBuffer() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+}
+
+float obtenerPrecioCombustible(int tipo) {
+    switch (tipo) {
+        case 1: return preciosRD.gasolina_regular;
+        case 2: return preciosRD.gasolina_premium;
+        case 3: return preciosRD.diesel;
+        case 4: return preciosRD.glp;
+        default: return 0.0f;
+    }
+}
+
+const char* nombreCombustible(int tipo) {
+    switch (tipo) {
+        case 1: return "Gasolina Regular";
+        case 2: return "Gasolina Premium";
+        case 3: return "Gasoil / Diesel";
+        case 4: return "GLP";
+        default: return "Desconocido";
+    }
+}
+
+void cargarPrecios() {
+    FILE *f = fopen(ARCHIVO_PRECIOS, "r");
+    if (f) {
+        fscanf(f, "%f,%f,%f,%f", &preciosRD.gasolina_regular, &preciosRD.gasolina_premium, &preciosRD.diesel, &preciosRD.glp);
+        fclose(f);
+    }
+}
+
+void guardarPrecios() {
+    FILE *f = fopen(ARCHIVO_PRECIOS, "w");
+    if (f) {
+        fprintf(f, "%.2f,%.2f,%.2f,%.2f\n", preciosRD.gasolina_regular, preciosRD.gasolina_premium, preciosRD.diesel, preciosRD.glp);
+        fclose(f);
+    }
+}
+
+void menuPrecios() {
+    printf("\n--- PRECIOS ACTUALES DE COMBUSTIBLE EN RD$ (POR GALON) ---\n");
+    printf("1. Gasolina Regular: RD$ %.2f\n", preciosRD.gasolina_regular);
+    printf("2. Gasolina Premium: RD$ %.2f\n", preciosRD.gasolina_premium);
+    printf("3. Diesel / Gasoil  : RD$ %.2f\n", preciosRD.diesel);
+    printf("4. GLP             : RD$ %.2f\n", preciosRD.glp);
+
+    printf("\n¿Desea actualizar los precios? (1: Si, 0: No): ");
+    int resp;
+    scanf("%d", &resp);
+    if (resp == 1) {
+        printf("Nuevo precio Gasolina Regular (RD$): "); scanf("%f", &preciosRD.gasolina_regular);
+        printf("Nuevo precio Gasolina Premium (RD$): "); scanf("%f", &preciosRD.gasolina_premium);
+        printf("Nuevo precio Diesel (RD$): ");           scanf("%f", &preciosRD.diesel);
+        printf("Nuevo precio GLP (RD$): ");              scanf("%f", &preciosRD.glp);
+        guardarPrecios();
+        printf("[+] Precios de combustibles actualizados exitosamente.\n");
+    }
+}
+
+int cargarVehiculos(Vehiculo vehiculos[]) {
+    FILE *f = fopen(ARCHIVO_VEHICULOS, "r");
+    if (!f) return 0;
+
+    int count = 0;
+    char linea[300];
+    fgets(linea, sizeof(linea), f); // Ignorar encabezado
+
+    while (fgets(linea, sizeof(linea), f)) {
+        Vehiculo v;
+        if (sscanf(linea, "%d,%29[^,],%29[^,],%d,%lf,%d,%lf,%lf,%lf,%lf,%lf,%f,%f,%d",
+                   &v.id, v.marca, v.modelo, &v.ano, &v.costo_vehiculo, &v.vida_util_anos,
+                   &v.km_anuales_est, &v.seguro_anual, &v.mantenimiento_anual,
+                   &v.costo_neumaticos, &v.km_neumaticos, &v.km_galon_ciudad,
+                   &v.km_galon_autopista, &v.tipo_combustible) == 14) {
+            vehiculos[count++] = v;
+        }
+    }
+    fclose(f);
+    return count;
+}
+
+void guardarVehiculos(Vehiculo vehiculos[], int cantidad) {
+    FILE *f = fopen(ARCHIVO_VEHICULOS, "w");
+    if (!f) return;
+
+    fprintf(f, "ID,Marca,Modelo,Ano,Costo,VidaUtil,KmAnuales,Seguro,Mantenimiento,CostoNeumaticos,KmNeumaticos,KmGCiudad,KmGAutopista,Combustible\n");
+    for (int i = 0; i < cantidad; i++) {
+        Vehiculo v = vehiculos[i];
+        fprintf(f, "%d,%s,%s,%d,%.2f,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%d\n",
+                v.id, v.marca, v.modelo, v.ano, v.costo_vehiculo, v.vida_util_anos,
+                v.km_anuales_est, v.seguro_anual, v.mantenimiento_anual,
+                v.costo_neumaticos, v.km_neumaticos, v.km_galon_ciudad,
+                v.km_galon_autopista, v.tipo_combustible);
+    }
+    fclose(f);
+}
+
+void crearVehiculo(Vehiculo vehiculos[], int *cantidad) {
+    Vehiculo v;
+    v.id = (*cantidad > 0) ? vehiculos[*cantidad - 1].id + 1 : 1;
+
+    printf("\n--- REGISTRAR NUEVO VEHICULO ---\n");
+    limpiarBuffer();
+    printf("Marca: "); fgets(v.marca, 30, stdin); v.marca[strcspn(v.marca, "\r\n")] = 0;
+    printf("Modelo: "); fgets(v.modelo, 30, stdin); v.modelo[strcspn(v.modelo, "\r\n")] = 0;
+    printf("Ano de fabricacion: "); scanf("%d", &v.ano);
+    printf("Costo total de compra (RD$): "); scanf("%lf", &v.costo_vehiculo);
+    printf("Vida util estimada (anos): "); scanf("%d", &v.vida_util_anos);
+    printf("Kilometros estimados recorridos por ano: "); scanf("%lf", &v.km_anuales_est);
+    printf("Costo de Seguro anual (RD$): "); scanf("%lf", &v.seguro_anual);
+    printf("Costo de Mantenimiento estimado por ano (RD$): "); scanf("%lf", &v.mantenimiento_anual);
+    printf("Costo juego de neumaticos (RD$): "); scanf("%lf", &v.costo_neumaticos);
+    printf("Intervalo de cambio de neumaticos (KM): "); scanf("%lf", &v.km_neumaticos);
+    printf("Rendimiento en CIUDAD (KM / Galon): "); scanf("%f", &v.km_galon_ciudad);
+    printf("Rendimiento en AUTOPISTA (KM / Galon): "); scanf("%f", &v.km_galon_autopista);
+    printf("Tipo de Combustible (1: Reg, 2: Prem, 3: Diesel, 4: GLP): "); scanf("%d", &v.tipo_combustible);
+
+    vehiculos[*cantidad] = v;
+    (*cantidad)++;
+    guardarVehiculos(vehiculos, *cantidad);
+    printf("\n[+] Vehiculo registrado y guardado con exito (ID: %d).\n", v.id);
+}
+
+void listarVehiculos(Vehiculo vehiculos[], int cantidad) {
+    if (cantidad == 0) {
+        printf("\nNo hay vehiculos registrados.\n");
+        return;
+    }
+
+    printf("\n====================================================================================\n");
+    printf("%-4s %-12s %-12s %-6s %-14s %-18s\n", "ID", "MARCA", "MODELO", "ANO", "COSTO (RD$)", "COMBUSTIBLE");
+    printf("====================================================================================\n");
+    for (int i = 0; i < cantidad; i++) {
+        printf("%-4d %-12s %-12s %-6d RD$ %-10.2f %-18s\n",
+               vehiculos[i].id, vehiculos[i].marca, vehiculos[i].modelo,
+               vehiculos[i].ano, vehiculos[i].costo_vehiculo,
+               nombreCombustible(vehiculos[i].tipo_combustible));
+    }
+    printf("====================================================================================\n");
+}
+
+void modificarVehiculo(Vehiculo vehiculos[], int cantidad) {
+    int id, pos = -1;
+    printf("\nIngrese el ID del vehiculo a modificar: ");
+    scanf("%d", &id);
+
+    for (int i = 0; i < cantidad; i++) {
+        if (vehiculos[i].id == id) { pos = i; break; }
+    }
+
+    if (pos == -1) {
+        printf("\nVehiculo no encontrado.\n");
+        return;
+    }
+
+    Vehiculo *v = &vehiculos[pos];
+    printf("\n--- MODIFICAR PARAMETROS DE %s %s (ID %d) ---\n", v->marca, v->modelo, v->id);
+    printf("Nuevo costo de compra (RD$) [Actual: %.2f]: ", v->costo_vehiculo); scanf("%lf", &v->costo_vehiculo);
+    printf("Nuevo mantenimiento anual (RD$) [Actual: %.2f]: ", v->mantenimiento_anual); scanf("%lf", &v->mantenimiento_anual);
+    printf("Nuevo seguro anual (RD$) [Actual: %.2f]: ", v->seguro_anual); scanf("%lf", &v->seguro_anual);
+    printf("Nuevo rendimiento ciudad (KM/G) [Actual: %.2f]: ", v->km_galon_ciudad); scanf("%f", &v->km_galon_ciudad);
+    printf("Nuevo rendimiento autopista (KM/G) [Actual: %.2f]: ", v->km_galon_autopista); scanf("%f", &v->km_galon_autopista);
+
+    guardarVehiculos(vehiculos, cantidad);
+    printf("\n[+] Vehiculo actualizado con exito.\n");
+}
+
+void borrarVehiculo(Vehiculo vehiculos[], int *cantidad) {
+    int id, pos = -1;
+    printf("\nIngrese el ID del vehiculo a borrar: ");
+    scanf("%d", &id);
+
+    for (int i = 0; i < *cantidad; i++) {
+        if (vehiculos[i].id == id) { pos = i; break; }
+    }
+
+    if (pos == -1) {
+        printf("\nVehiculo no encontrado.\n");
+        return;
+    }
+
+    for (int i = pos; i < *cantidad - 1; i++) {
+        vehiculos[i] = vehiculos[i + 1];
+    }
+    (*cantidad)--;
+    guardarVehiculos(vehiculos, *cantidad);
+    printf("\n[-] Vehiculo borrado exitosamente.\n");
+}
+
+void calcularViajeYCostoKM(Vehiculo vehiculos[], int cantidad) {
+    if (cantidad == 0) {
+        printf("\nNo hay vehiculos disponibles para calcular.\n");
+        return;
+    }
+
+    int id, pos = -1;
+    printf("\nIngrese el ID del vehiculo: ");
+    scanf("%d", &id);
+
+    for (int i = 0; i < cantidad; i++) {
+        if (vehiculos[i].id == id) { pos = i; break; }
+    }
+
+    if (pos == -1) {
+        printf("\nVehiculo no encontrado.\n");
+        return;
+    }
+
+    Vehiculo v = vehiculos[pos];
+    double km_totales_vida = v.km_anuales_est * v.vida_util_anos;
+
+    // Costos desglosados por KM (Costos fijos operacionales)
+    double amortizacion_km = v.costo_vehiculo / km_totales_vida;
+    double mantenimiento_km = v.mantenimiento_anual / v.km_anuales_est;
+    double seguro_km = v.seguro_anual / v.km_anuales_est;
+    double neumaticos_km = v.costo_neumaticos / v.km_neumaticos;
+    double costo_fijo_total_km = amortizacion_km + mantenimiento_km + seguro_km + neumaticos_km;
+
+    // Costo de combustible por KM
+    float precio_galon = obtenerPrecioCombustible(v.tipo_combustible);
+    double combustible_ciudad_km = precio_galon / v.km_galon_ciudad;
+    double combustible_autopista_km = precio_galon / v.km_galon_autopista;
+
+    // Costo total real por KM
+    double costo_real_ciudad_km = costo_fijo_total_km + combustible_ciudad_km;
+    double costo_real_autopista_km = costo_fijo_total_km + combustible_autopista_km;
+
+    printf("\n=================================================================\n");
+    printf("       ESTRUCUTRA DE COSTO REAL Y AMORTIZACION POR KM           \n");
+    printf("=================================================================\n");
+    printf("Vehiculo: %s %s %d | Combustible: %s (RD$ %.2f / Galon)\n", v.marca, v.modelo, v.ano, nombreCombustible(v.tipo_combustible), precio_galon);
+    printf("-----------------------------------------------------------------\n");
+    printf(" Amortizacion Vehiculo:     RD$ %7.2f / km\n", amortizacion_km);
+    printf(" Mantenimiento:             RD$ %7.2f / km\n", mantenimiento_km);
+    printf(" Seguro:                    RD$ %7.2f / km\n", seguro_km);
+    printf(" Neumaticos:                RD$ %7.2f / km\n", neumaticos_km);
+    printf(" Subtotal Fijo Operativo:   RD$ %7.2f / km\n", costo_fijo_total_km);
+    printf("-----------------------------------------------------------------\n");
+    printf(" Combustible en CIUDAD:     RD$ %7.2f / km\n", combustible_ciudad_km);
+    printf(" Combustible en AUTOPISTA:  RD$ %7.2f / km\n", combustible_autopista_km);
+    printf("-----------------------------------------------------------------\n");
+    printf(" COSTO TOTAL REAL CIUDAD:    RD$ %7.2f / km\n", costo_real_ciudad_km);
+    printf(" COSTO TOTAL REAL AUTOPISTA: RD$ %7.2f / km\n", costo_real_autopista_km);
+    printf("=================================================================\n");
+
+    // Cálculo de Viaje
+    double km_ciudad, km_autopista;
+    printf("\n--- CALCULO DE COSTO DE UN VIAJE ESPECIFICO ---\n");
+    printf("Ingrese kilometros a recorrer en CIUDAD: ");
+    scanf("%lf", &km_ciudad);
+    printf("Ingrese kilometros a recorrer en AUTOPISTA: ");
+    scanf("%lf", &km_autopista);
+
+    double galones_ciudad = km_ciudad / v.km_galon_ciudad;
+    double galones_autopista = km_autopista / v.km_galon_autopista;
+    double total_galones = galones_ciudad + galones_autopista;
+    double costo_combustible_viaje = total_galones * precio_galon;
+
+    double costo_fijo_viaje = (km_ciudad + km_autopista) * costo_fijo_total_km;
+    double costo_total_viaje = costo_combustible_viaje + costo_fijo_viaje;
+
+    printf("\n-----------------------------------------------------------------\n");
+    printf(" RESUMEN DEL VIAJE (Total: %.2f km)\n", km_ciudad + km_autopista);
+    printf("-----------------------------------------------------------------\n");
+    printf(" Consumo total estimado:     %.2f Galones de %s\n", total_galones, nombreCombustible(v.tipo_combustible));
+    printf(" Gasto de Combustible:       RD$ %.2f\n", costo_combustible_viaje);
+    printf(" Desgaste / Amortizacion:    RD$ %.2f\n", costo_fijo_viaje);
+    printf(" COSTO REAL TOTAL DEL VIAJE: RD$ %.2f\n", costo_total_viaje);
+    printf("=================================================================\n");
+}
